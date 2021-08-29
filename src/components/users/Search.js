@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-export class Search extends Component {
+class Search extends Component {
   state = {
     text: '',
   }
@@ -9,17 +9,24 @@ export class Search extends Component {
     searchUsers: PropTypes.func.isRequired,
     clearUsers: PropTypes.func.isRequired,
     showClear: PropTypes.bool.isRequired,
+    setAlert: PropTypes.func.isRequired,
   }
   onChange = (e) => {
     this.setState({
       [e.target.name]: e.target.value,
+      //alt, text : e.target.value
+      //this is so that we are able to view the changes in the search bar
     })
   }
 
   onSubmit = (e) => {
-    e.preventDefault()
-    this.props.searchUsers(this.state.text)
-    this.setState({ text: '' })
+    e.preventDefault() //prevent from submitting a form
+    if (this.state.text === '') {
+      this.props.setAlert('Please enter something', 'light')
+    } else {
+      this.props.searchUsers(this.state.text) //call the searchUsers function
+      this.setState({ text: '' }) //empty the search area
+    }
   }
   render() {
     const { showClear, clearUsers } = this.props
@@ -30,7 +37,7 @@ export class Search extends Component {
             type='text'
             name='text'
             placeholder='Search Users...'
-            value={this.state.text}
+            value={this.state.text} //the code apparently works without this line too
             onChange={this.onChange}
           />
           <input

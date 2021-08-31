@@ -15,40 +15,52 @@ class App extends Component {
     user: {},
     loading: false,
     alert: null,
+    repos: [],
   }
+
   //Search GitHub Users
   searchUsers = async (text) => {
     this.setState({ loading: true })
-    console.log(text)
     const res = await axios.get(
       `https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&
       client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
     )
     this.setState({ users: res.data.items, loading: false })
   }
-  //Get single GitHub user
+
+  //Get Single GitHub user
   getUser = async (username) => {
     this.setState({ loading: true })
     const res = await axios.get(
       `https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&
       client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
     )
-    console.log(res.data)
     this.setState({ user: res.data, loading: false })
+  }
+
+  //Get User Repos
+  getUserRepos = async (username) => {
+    this.setState({ loading: true })
+    const res = await axios.get(
+      `https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&
+      client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    )
+    this.setState({ repos: res.data, loading: false })
   }
 
   //Clear Users from state
   clearUsers = () => {
     this.setState({ users: [], loading: false })
   }
-
+  //Set Alert on null form input
   setAlert = (msg, type) => {
     this.setState({ alert: { msg: msg, type: type } })
+    //After 5 seconds remove the alert message
     setTimeout(() => this.setState({ alert: null }), 5000)
   }
 
   render() {
-    const { users, user, loading } = this.state //Destructure users and loading from the state
+    const { users, user, repos, loading } = this.state
     return (
       <Router>
         <div className='App'>
@@ -62,10 +74,6 @@ class App extends Component {
                 render={(props) => (
                   <Fragment>
                     <Search
-                      /*
-            Notice how searchUsers and clearUsers are defined in App.js but are actually fired 
-            off from the Search Component.
-           */
                       searchUsers={this.searchUsers}
                       clearUsers={this.clearUsers}
                       showClear={users.length > 0 ? true : false}
@@ -83,6 +91,8 @@ class App extends Component {
                   <UserPage
                     {...props}
                     getUser={this.getUser}
+                    getUserRepos={this.getUserRepos}
+                    repos={repos}
                     user={user}
                     loading={loading}
                   />
